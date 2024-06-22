@@ -10,10 +10,8 @@ func connect() (*sql.DB, error) {
 	}
 
 	sqlStmt := `
-    	create table if not exists articles (
-		id integer not null primary key autoincrement,
-		title text,
-	content text);`
+	create table if not exists articles (id integer not null primary key autoincrement, title text, content text);
+	`
 
 	_, err = db.Exec(sqlStmt)
 	if err != nil {
@@ -24,13 +22,14 @@ func connect() (*sql.DB, error) {
 }
 
 func dbCreateArticle(article *Article) error {
-	query, err := db.Prepare("insert into articles(title, content) values(?, ?)")
+	query, err := db.Prepare("insert into articles(title,content) values (?,?)")
 	defer query.Close()
 
 	if err != nil {
 		return err
 	}
 	_, err = query.Exec(article.Title, article.Content)
+
 	if err != nil {
 		return err
 	}
@@ -38,21 +37,30 @@ func dbCreateArticle(article *Article) error {
 	return nil
 }
 
-func dbGetAllArticles() ([]Article, error) {
-	rows, err := db.Query("select id, title, content from articles")
+func dbGetAllArticles() ([]*Article, error) {
+	query, err := db.Prepare("select id, title, content from articles")
+	defer query.Close()
+
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
+	result, err := query.Query()
 
-	var articles []Article
-	for rows.Next() {
-		var article Article
-		err = rows.Scan(&article.ID, &article.Title, &article.Content)
+	if err != nil {
+		return nil, err
+	}
+	articles := make([]*Article, 0)
+	for result.Next() {
+		data := new(Article)
+		err := result.Scan(
+			&data.ID,
+			&data.Title,
+			&data.Content,
+		)
 		if err != nil {
 			return nil, err
 		}
-		articles = append(articles, article)
+		articles = append(articles, data)
 	}
 
 	return articles, nil
@@ -61,15 +69,18 @@ func dbGetAllArticles() ([]Article, error) {
 func dbGetArticle(articleID string) (*Article, error) {
 	query, err := db.Prepare("select id, title, content from articles where id = ?")
 	defer query.Close()
+
 	if err != nil {
 		return nil, err
 	}
 	result := query.QueryRow(articleID)
 	data := new(Article)
 	err = result.Scan(&data.ID, &data.Title, &data.Content)
+
 	if err != nil {
 		return nil, err
 	}
+
 	return data, nil
 }
 

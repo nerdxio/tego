@@ -1,32 +1,25 @@
-<!doctype html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport"
-          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Create a new article</title>
+{{define "title"}}Create new article{{end}}
+{{define "scripts"}}
     <script src="https://cdn.tiny.cloud/1/b68ofyy73xkp31cagl454uwc5cunrggb718ivvheo5t11dc4/tinymce/7/tinymce.min.js" referrerpolicy="origin"></script>
-
-    <script>
-        tinymce.init({
-            selector: 'textarea',  // change this value according to your HTML
-            plugins: 'code',
-            toolbar: 'code',
+        <script>
+            tinymce.init({
+            selector: '#mytextarea',
+            plugins: 'image',
+            toolbar: 'undo redo | blocks | image | ' +
+            'bold italic backcolor | alignleft aligncenter ' +
+            'alignright alignjustify | bullist numlist outdent indent | ' +
+            'removeformat | help',
+            images_upload_url: "/upload",
+            relative_urls : false,
+            remove_script_host : false,
+            convert_urls : true,
         });
-
-        // tinymce.init({
-        //     selector: '#mytextarea',
-        // });
     </script>
-
-</head>
-<body>
-    <h1>Create a new article</h1>
+{{end}}
+{{define "body"}}
     <form method="post" action="/articles">
-        <input id="title" type="text" name="title" placeholder="Enter the title">
+        <input type="text" name="title" placeholder="Enter the title">
         <textarea id="mytextarea" name="content"></textarea>
-    <button id="submit" type="submit">Create</button>
-</form>
-</body>
-</html>
+        <button id="submit" type="submit">Create</button>
+    </form>
+{{end}}
